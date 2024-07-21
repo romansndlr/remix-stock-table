@@ -10,9 +10,9 @@ import {
   NumberField,
 } from 'react-aria-components'
 import { AnimatePresence, motion } from 'framer-motion'
+import { isEmpty } from 'lodash-es'
 import { Modal } from '~/components/modal'
 import { loader } from './route'
-import { isEmpty } from 'lodash-es'
 
 interface FetcherData {
   ok: boolean

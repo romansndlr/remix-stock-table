@@ -3,6 +3,7 @@ import { json, useLoaderData } from '@remix-run/react'
 import { useEventSource } from 'remix-utils/sse/react'
 import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { z } from 'zod'
+import { getClientLocales } from 'remix-utils/locales/server'
 import { getStocks } from '~/services/stocks-service.server'
 import { Table } from '~/components/table'
 import { commitSession, getSession } from '~/lib/session.server'
@@ -12,7 +13,6 @@ import { StockNetChangeCell } from './table-cells/stock-net-change-cell'
 import { StockLowValueCell } from './table-cells/stock-low-value-cell'
 import { StockHighValueCell } from './table-cells/stock-high-value-cell'
 import { StocksUpdateIntervalModal } from './stocks-update-interval-modal'
-import { getClientLocales } from 'remix-utils/locales/server'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request)
@@ -98,7 +98,7 @@ export default function Index() {
   }, [loaderData.stocks, stocksEventData])
 
   return (
-    <div className="flex flex-col gap-5 items-end">
+    <div className="flex flex-col gap-5">
       <StocksUpdateIntervalModal />
       <Table aria-label="Stocks">
         <Table.Header>

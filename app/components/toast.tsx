@@ -21,7 +21,24 @@ export const toastQueue = new ToastQueue<ToastContent>({
   hasExitAnimation: true,
 })
 
-export function Toast({ state, ...props }: ToastProps) {
+export function ToastRegion({ state, ...props }: ToastRegionProps) {
+  const ref = React.useRef(null)
+  const { regionProps } = useToastRegion(props, state, ref)
+
+  return (
+    <div
+      {...regionProps}
+      className="fixed bottom-6 right-6 flex flex-col gap-2 focus:outline-none"
+      ref={ref}
+    >
+      {state.visibleToasts.map((toast) => (
+        <Toast key={toast.key} state={state} toast={toast} />
+      ))}
+    </div>
+  )
+}
+
+function Toast({ state, ...props }: ToastProps) {
   const ref = React.useRef(null)
   const { toastProps, titleProps, closeButtonProps } = useToast(
     props,
@@ -50,23 +67,6 @@ export function Toast({ state, ...props }: ToastProps) {
       >
         <CloseIcon />
       </Button>
-    </div>
-  )
-}
-
-export function ToastRegion({ state, ...props }: ToastRegionProps) {
-  const ref = React.useRef(null)
-  const { regionProps } = useToastRegion(props, state, ref)
-
-  return (
-    <div
-      {...regionProps}
-      className="fixed bottom-6 right-6 flex flex-col gap-2 focus:outline-none"
-      ref={ref}
-    >
-      {state.visibleToasts.map((toast) => (
-        <Toast key={toast.key} state={state} toast={toast} />
-      ))}
     </div>
   )
 }

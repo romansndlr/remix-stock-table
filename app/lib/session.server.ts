@@ -1,4 +1,5 @@
 import { createCookieSessionStorage, Session } from '@remix-run/node'
+import invariant from 'tiny-invariant'
 
 type SessionData = {
   interval: number
@@ -7,6 +8,8 @@ type SessionData = {
 type SessionFlashData = {
   message: string
 }
+
+invariant(process.env.SESSION_SECRET, 'You must set the SESSION_SECRET env var')
 
 const sessionStorage = createCookieSessionStorage<
   SessionData,
@@ -17,7 +20,7 @@ const sessionStorage = createCookieSessionStorage<
     httpOnly: true,
     maxAge: 60,
     sameSite: 'lax',
-    secrets: ['s3cret1'],
+    secrets: [process.env.SESSION_SECRET],
     secure: true,
   },
 })
