@@ -63,7 +63,7 @@ function Toast({ state, ...props }: ToastProps) {
       </div>
       <Button
         {...closeButtonProps}
-        className="flex justify-center items-center hover:bg-white/10 pl-2 pr-2.5 outline-none border-l border-white/25"
+        className="flex justify-center items-center hover:bg-white/10 focus:bg-white/10 pl-2 pr-2.5 outline-none border-l border-white/25"
       >
         <CloseIcon />
       </Button>

@@ -60,7 +60,7 @@ export const StocksUpdateIntervalModal = React.memo(() => {
                     fetcher.state === 'submitting' ||
                     fetcher.state === 'loading'
                   }
-                  className="px-5 py-1.5 rounded-lg disabled:bg-indigo-200 disabled:text-indigo-300 disabled:cursor-not-allowed hover:bg-indigo-600 transition-colors bg-indigo-500 outline-indigo-700 text-white"
+                  className="px-5 py-1.5 rounded-lg disabled:bg-indigo-600 disabled:text-indigo-400 disabled:cursor-not-allowed hover:bg-indigo-600 transition-colors bg-indigo-500 outline-indigo-600 text-white"
                 >
                   Update
                 </Button>
