@@ -30,7 +30,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const session = await getSession(request)
 
-  const currentInterval = session.get('interval')
+  const currentInterval = session.get('interval') ?? DEFAULT_INTERVAL
 
   const StockUpdateEventConfigurationSchema = z
     .object({
