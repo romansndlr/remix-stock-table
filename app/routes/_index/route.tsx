@@ -13,6 +13,7 @@ import { StockNetChangeCell } from './table-cells/stock-net-change-cell'
 import { StockLowValueCell } from './table-cells/stock-low-value-cell'
 import { StockHighValueCell } from './table-cells/stock-high-value-cell'
 import { StocksUpdateIntervalModal } from './stocks-update-interval-modal'
+import { emitter } from '~/lib/events.server'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request)
@@ -54,6 +55,7 @@ export async function action({ request }: ActionFunctionArgs) {
     })
 
     session.set('interval', validated.interval)
+    emitter.emit('update-interval', validated.interval)
 
     const locales = getClientLocales(request)
 
@@ -80,16 +82,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Index() {
   const loaderData = useLoaderData<typeof loader>()
-
-  const stocksEventSourceURL = React.useMemo(() => {
-    const searchParams = new URLSearchParams({
-      interval: loaderData.interval.toString(),
-    })
-
-    return `/api/events/stocks?${searchParams}`
-  }, [loaderData.interval])
-
-  const stocksEventData = useEventSource(stocksEventSourceURL)
+  const stocksEventData = useEventSource('/api/events/stocks')
 
   const stocks = React.useMemo(() => {
     if (!stocksEventData) return loaderData.stocks

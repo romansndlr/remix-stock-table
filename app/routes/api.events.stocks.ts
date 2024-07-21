@@ -1,27 +1,29 @@
 import { LoaderFunctionArgs } from '@remix-run/node'
 import { isNumber } from 'lodash-es'
 import { eventStream } from 'remix-utils/sse/server'
+import { emitter } from '~/lib/events.server'
+import { getSession } from '~/lib/session.server'
 import { getStocks } from '~/services/stocks-service.server'
 
 export const DEFAULT_INTERVAL = 1000
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url)
+  const session = await getSession(request)
 
-  const interval = Number(url.searchParams.get('interval'))
-
-  if (isNumber(interval)) {
-    if (interval < 1000) {
-      return new Response('Interval must be at least 1000', { status: 400 })
-    }
-  } else {
-    return new Response('Invalid interval', { status: 400 })
-  }
+  const interval = session.get('interval') ?? DEFAULT_INTERVAL
 
   return eventStream(request.signal, (send) => {
     const event = () => send({ data: JSON.stringify(getStocks()) })
 
-    const timer = setInterval(event, interval ?? DEFAULT_INTERVAL)
+    let timer = setInterval(event, interval)
+
+    emitter.on('update-interval', (newInterval) => {
+      if (isNumber(newInterval)) {
+        clearInterval(timer)
+
+        timer = setInterval(event, newInterval)
+      }
+    })
 
     return () => clearInterval(timer)
   })
