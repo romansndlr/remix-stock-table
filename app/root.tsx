@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   ClientLoaderFunctionArgs,
   Links,
@@ -7,12 +8,11 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react'
-import './tailwind.css'
-import React from 'react'
 import { useToastQueue } from '@react-stately/toast'
+import { json, LoaderFunctionArgs } from '@remix-run/node'
 import { toastQueue, ToastRegion } from './components/toast'
 import { commitSession, getSession } from './lib/session.server'
-import { json, LoaderFunctionArgs } from '@remix-run/node'
+import './tailwind.css'
 
 export const meta: MetaFunction = () => {
   return [

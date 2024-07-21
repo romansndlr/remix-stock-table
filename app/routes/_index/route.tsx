@@ -7,13 +7,13 @@ import { getClientLocales } from 'remix-utils/locales/server'
 import { getStocks } from '~/services/stocks-service.server'
 import { Table } from '~/components/table'
 import { commitSession, getSession } from '~/lib/session.server'
+import { emitter } from '~/lib/events.server'
 import { DEFAULT_INTERVAL } from '../api.events.stocks'
 import { StockPercentageChangeCell } from './table-cells/stock-percentage-change-cell'
 import { StockNetChangeCell } from './table-cells/stock-net-change-cell'
 import { StockLowValueCell } from './table-cells/stock-low-value-cell'
 import { StockHighValueCell } from './table-cells/stock-high-value-cell'
 import { StocksUpdateIntervalModal } from './stocks-update-interval-modal'
-import { emitter } from '~/lib/events.server'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request)
