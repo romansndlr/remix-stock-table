@@ -1,4 +1,5 @@
 import {
+  ClientLoaderFunctionArgs,
   Links,
   Meta,
   MetaFunction,
@@ -8,6 +9,10 @@ import {
 } from '@remix-run/react'
 import './tailwind.css'
 import React from 'react'
+import { useToastQueue } from '@react-stately/toast'
+import { toastQueue, ToastRegion } from './components/toast'
+import { commitSession, getSession } from './lib/session.server'
+import { json, LoaderFunctionArgs } from '@remix-run/node'
 
 export const meta: MetaFunction = () => {
   return [
@@ -17,6 +22,27 @@ export const meta: MetaFunction = () => {
       content: 'A live updating stocks table built with Remix',
     },
   ]
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const session = await getSession(request)
+
+  const message = session.get('message')
+
+  return json(
+    { message },
+    { headers: { 'Set-Cookie': await commitSession(session) } }
+  )
+}
+
+export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
+  const { message } = await serverLoader<typeof loader>()
+
+  if (message) {
+    toastQueue.add({ title: message }, { timeout: 5000 })
+  }
+
+  return null
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -29,9 +55,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="h-full bg-gradient-to-r from-indigo-500 to-violet-500">
-        <main className="flex items-center justify-center h-full">
-          {children}
-        </main>
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -40,5 +64,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />
+  const state = useToastQueue(toastQueue)
+
+  return (
+    <>
+      <main className="flex items-center justify-center h-full p-6">
+        <Outlet />
+      </main>
+      <ToastRegion state={state} />
+    </>
+  )
 }

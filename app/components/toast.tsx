@@ -1,22 +1,27 @@
 import { AriaToastProps, useToast, useToastRegion } from '@react-aria/toast'
 import type { AriaToastRegionProps } from '@react-aria/toast'
-import { ToastQueue, ToastState, useToastQueue } from '@react-stately/toast'
+import { ToastQueue, ToastState } from '@react-stately/toast'
 import React from 'react'
 import { Button } from 'react-aria-components'
 
-interface ToastProps<T> extends AriaToastProps<T> {
-  state: ToastState<T>
+interface ToastContent {
+  title: string
 }
 
-export const toastQueue = new ToastQueue<React.ReactNode>({
+interface ToastProps extends AriaToastProps<ToastContent> {
+  state: ToastState<ToastContent>
+}
+
+interface ToastRegionProps extends AriaToastRegionProps {
+  state: ToastState<ToastContent>
+}
+
+export const toastQueue = new ToastQueue<ToastContent>({
   maxVisibleToasts: 5,
   hasExitAnimation: true,
 })
 
-export function Toast<T extends React.ReactNode>({
-  state,
-  ...props
-}: ToastProps<T>) {
+export function Toast({ state, ...props }: ToastProps) {
   const ref = React.useRef(null)
   const { toastProps, titleProps, closeButtonProps } = useToast(
     props,
@@ -28,19 +33,20 @@ export function Toast<T extends React.ReactNode>({
     <div
       {...toastProps}
       ref={ref}
-      className="bg-green-600 entering:animate-in entering:slide-in-from-bottom-0 entering:ease-out entering:duration-300 exiting:animate-out exiting:slide-out-to-bottom-0 exiting:ease-in exiting:duration-200 rounded-full shadow text-white py-2 pl-5 pr-2 flex items-center gap-x-3"
-      data-entering={props.toast.animation === 'entering'}
-      data-exiting={props.toast.animation === 'exiting'}
+      className="bg-green-600 overflow-hidden data-[animation=entering]:animate-in data-[animation=entering]:slide-in-from-right data-[animation=exiting]:animate-out data-[animation=exiting]:slide-out-to-right rounded-xl shadow text-white flex"
+      data-animation={props.toast.animation}
       onAnimationEnd={() => {
         if (props.toast.animation === 'exiting') {
           state.remove(props.toast.key)
         }
       }}
     >
-      <div {...titleProps}>{props.toast.content}</div>
+      <div {...titleProps} className="py-2 pl-4 pr-2">
+        {props.toast.content.title}
+      </div>
       <Button
         {...closeButtonProps}
-        className="rounded-full hover:bg-white/15 p-0.5"
+        className="flex justify-center items-center hover:bg-white/10 pl-2 pr-2.5 outline-none border-l border-white/25"
       >
         <CloseIcon />
       </Button>
@@ -48,15 +54,18 @@ export function Toast<T extends React.ReactNode>({
   )
 }
 
-export function ToastRegion(props: AriaToastRegionProps) {
+export function ToastRegion({ state, ...props }: ToastRegionProps) {
   const ref = React.useRef(null)
-  const state = useToastQueue(toastQueue)
   const { regionProps } = useToastRegion(props, state, ref)
 
   return (
-    <div {...regionProps} ref={ref} className="fixed bottom-6 right-6">
+    <div
+      {...regionProps}
+      className="fixed bottom-6 right-6 flex flex-col gap-2 focus:outline-none"
+      ref={ref}
+    >
       {state.visibleToasts.map((toast) => (
-        <Toast key={toast.key} toast={toast} state={state} />
+        <Toast key={toast.key} state={state} toast={toast} />
       ))}
     </div>
   )

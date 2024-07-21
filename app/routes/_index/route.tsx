@@ -12,6 +12,7 @@ import { StockNetChangeCell } from './table-cells/stock-net-change-cell'
 import { StockLowValueCell } from './table-cells/stock-low-value-cell'
 import { StockHighValueCell } from './table-cells/stock-high-value-cell'
 import { StocksUpdateIntervalModal } from './stocks-update-interval-modal'
+import { getClientLocales } from 'remix-utils/locales/server'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request)
@@ -26,22 +27,40 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const interval = formData.get('interval')
 
-  const StockUpdateEventConfigurationSchema = z.object({
-    interval: z
-      .number({ coerce: true })
-      .min(1000, { message: "Interval can't be faster than 1s" })
-      .max(10000, { message: "Interval can't be slower than 10s" }),
-  })
+  const session = await getSession(request)
+
+  const currentInterval = session.get('interval')
+
+  const StockUpdateEventConfigurationSchema = z
+    .object({
+      interval: z
+        .number({ coerce: true })
+        .min(1000, { message: "Interval can't be faster than 1s" })
+        .max(10000, { message: "Interval can't be slower than 10s" }),
+    })
+    .superRefine((data, ctx) => {
+      if (data.interval === currentInterval) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Interval is already set to this value',
+          path: ['interval'],
+        })
+      }
+    })
 
   try {
     const validated = await StockUpdateEventConfigurationSchema.parseAsync({
       interval,
     })
 
-    const session = await getSession(request)
-
     session.set('interval', validated.interval)
-    session.flash('message', `Interval updated to ${validated.interval}ms`)
+
+    const locales = getClientLocales(request)
+
+    session.flash(
+      'message',
+      `Interval updated to ${validated.interval.toLocaleString(locales)} ms`
+    )
 
     return json(
       { ok: true },

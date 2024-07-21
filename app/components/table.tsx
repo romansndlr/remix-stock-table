@@ -14,9 +14,11 @@ import {
 
 function _Table(props: TableProps) {
   return (
-    <article className="overflow-auto relative bg-white rounded-lg shadow text-gray-600">
-      <Table {...props} className="border-separate border-spacing-0" />
-    </article>
+    <div className="overflow-hidden">
+      <div className="overflow-auto relative bg-white rounded-lg shadow text-gray-600">
+        <Table {...props} className="border-separate border-spacing-0" />
+      </div>
+    </div>
   )
 }
 
